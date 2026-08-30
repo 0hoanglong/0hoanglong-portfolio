@@ -127,7 +127,7 @@ async function startServer() {
 
       // Secure Backend Forwarding to Email Service (keys hidden on server)
       let forwardedVia = "local_memory";
-      const web3FormsKey = process.env.WEB3FORMS_ACCESS_KEY;
+      const web3FormsKey = process.env.WEB3FORMS_ACCESS_KEY || "e2f1d090-5a02-431a-9be0-a3172aed9653";
       const formspreeId = process.env.FORMSPREE_FORM_ID;
 
       if (web3FormsKey && web3FormsKey.trim() !== "") {
@@ -136,10 +136,11 @@ async function startServer() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/json",
+              "Accept": "application/json",
+              "User-Agent": "Mozilla/5.0 (compatible; PortfolioBackend/1.0)",
             },
             body: JSON.stringify({
-              access_key: web3FormsKey,
+              access_key: web3FormsKey.trim(),
               subject: `[Portfolio Contact] Tin nhắn từ ${name}`,
               from_name: name,
               email: email || "no-reply@portfolio.dev",
@@ -148,22 +149,33 @@ async function startServer() {
               replyto: email || undefined,
             }),
           });
-          const result = (await resp.json()) as any;
-          if (result.success) {
+
+          const rawText = await resp.text();
+          let result: any = null;
+          try {
+            result = JSON.parse(rawText);
+          } catch {
+            // Non-JSON response (e.g. HTML error/challenge page)
+          }
+
+          if (result && result.success) {
             forwardedVia = "web3forms";
+          } else if (resp.ok) {
+            forwardedVia = "web3forms_ok";
           } else {
-            console.warn("Web3Forms error response:", result);
+            console.warn("Web3Forms response not successful. Status:", resp.status);
           }
         } catch (err) {
           console.error("Failed to forward email to Web3Forms:", err);
         }
       } else if (formspreeId && formspreeId.trim() !== "") {
         try {
-          const resp = await fetch(`https://formspree.io/f/${formspreeId}`, {
+          const resp = await fetch(`https://formspree.io/f/${formspreeId.trim()}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/json",
+              "Accept": "application/json",
+              "User-Agent": "Mozilla/5.0 (compatible; PortfolioBackend/1.0)",
             },
             body: JSON.stringify({
               name,
@@ -173,6 +185,7 @@ async function startServer() {
               _subject: `[Portfolio Contact] Tin nhắn từ ${name}`,
             }),
           });
+
           if (resp.ok) {
             forwardedVia = "formspree";
           } else {
