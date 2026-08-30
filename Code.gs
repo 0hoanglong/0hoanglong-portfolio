@@ -5,7 +5,7 @@
  * 
  * CHỨC NĂNG:
  * 1. Tự động lưu toàn bộ dữ liệu tin nhắn vào Google Sheets (Thời gian, Tên, Email, SĐT, Nội dung).
- * 2. Tự động gửi email thông báo từ Mail 1 (Mail tạo script) sang Mail đích chính (longred101@gmail.com).
+ * 2. Tự động gửi email thông báo từ Mail 1 (longred101@gmail.com) sang Mail đích chính (hoanglong.tech07@gmail.com).
  * 
  * HƯỚNG DẪN CÀI ĐẶT TRÊN GOOGLE SHEETS:
  * 1. Tạo Google Sheet mới tại: https://sheets.new
@@ -53,8 +53,8 @@ function doPost(e) {
       message
     ]);
 
-    // 2. Cấu hình Email đích chính để nhận thông báo
-    var targetEmail = "longred101@gmail.com"; 
+    // 2. Gửi email từ Mail 1 sang Mail đích chính (GmailApp hỗ trợ xóa ngay sau khi gửi)
+    var targetEmail = "hoanglong.tech07@gmail.com"; 
     var emailSubject = "🔥 [Portfolio] Tin nhắn liên hệ mới từ: " + name;
     
     var emailBody = 
@@ -70,13 +70,17 @@ function doPost(e) {
       "─────────────────────────────────────────\n" +
       "📊 Dữ liệu này đã được tự động ghi lại vào Google Sheets của bạn.";
 
-    // Gửi email qua MailApp của Google
-    MailApp.sendEmail({
-      to: targetEmail,
-      subject: emailSubject,
-      body: emailBody,
+    // Gửi email qua GmailApp
+    GmailApp.sendEmail(targetEmail, emailSubject, emailBody, {
       replyTo: (email && email.indexOf("@") > 0) ? email : targetEmail
     });
+
+    // 3. Tự động chuyển email vừa gửi vào Thùng rác (Trash) để giải phóng dung lượng Mail 1
+    Utilities.sleep(1200); // Chờ 1.2s để Gmail lập chỉ mục thư đã gửi
+    var sentThreads = GmailApp.search('to:' + targetEmail + ' subject:"' + emailSubject + '" in:sent', 0, 1);
+    if (sentThreads && sentThreads.length > 0) {
+      sentThreads[0].moveToTrash(); // Chuyển vào thùng rác (tự dọn sạch mà không tốn dung lượng)
+    }
 
     return ContentService.createTextOutput(JSON.stringify({
       success: true,

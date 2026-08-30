@@ -50,25 +50,33 @@ export default async function handler(req: any, res: any) {
     }
 
     // 3. Secure backend forwarding to Google Apps Script (Google Sheets + Email)
-    const googleScriptUrl = process.env.GOOGLE_SCRIPT_URL;
+    const googleScriptUrl =
+      process.env.GOOGLE_SCRIPT_URL ||
+      "https://script.google.com/macros/s/AKfycbxu19mylIo6MhW5XnxhSTXZ-FNQvbPwA1F7e8RA_w2TcxKXy_EVddWzflxsZV_TPrkAbQ/exec";
     let deliveryStatus = "local_memory";
 
     if (googleScriptUrl && googleScriptUrl.trim() !== "") {
       try {
+        const payload = JSON.stringify({
+          name: name.trim(),
+          email: email?.trim() || "Không cung cấp",
+          phone: phone?.trim() || "Không cung cấp",
+          message: message.trim(),
+        });
+
         const resp = await fetch(googleScriptUrl.trim(), {
           method: "POST",
+          redirect: "follow",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "text/plain;charset=utf-8",
           },
-          body: JSON.stringify({
-            name: name.trim(),
-            email: email?.trim() || "Không cung cấp",
-            phone: phone?.trim() || "Không cung cấp",
-            message: message.trim(),
-          }),
+          body: payload,
         });
+
         if (resp.ok) {
           deliveryStatus = "google_apps_script";
+        } else {
+          console.warn("Vercel Serverless Google Apps Script non-200:", resp.status);
         }
       } catch (err) {
         console.error("Vercel Serverless Google Apps Script error:", err);

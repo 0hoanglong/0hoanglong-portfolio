@@ -127,28 +127,42 @@ async function startServer() {
 
       // Secure Backend Forwarding to Google Apps Script (Google Sheets + Email)
       let forwardedVia = "local_memory";
-      const googleScriptUrl = process.env.GOOGLE_SCRIPT_URL;
+      const googleScriptUrl =
+        process.env.GOOGLE_SCRIPT_URL ||
+        "https://script.google.com/macros/s/AKfycbxu19mylIo6MhW5XnxhSTXZ-FNQvbPwA1F7e8RA_w2TcxKXy_EVddWzflxsZV_TPrkAbQ/exec";
 
       if (googleScriptUrl && googleScriptUrl.trim() !== "") {
         try {
+          console.log("Forwarding message to Google Apps Script URL:", googleScriptUrl.trim());
+          const payload = JSON.stringify({
+            name,
+            email: email || "Không cung cấp",
+            phone: phone || "Không cung cấp",
+            message,
+          });
+
           const resp = await fetch(googleScriptUrl.trim(), {
             method: "POST",
+            redirect: "follow",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type": "text/plain;charset=utf-8",
             },
-            body: JSON.stringify({
-              name,
-              email: email || "Không cung cấp",
-              phone: phone || "Không cung cấp",
-              message,
-            }),
+            body: payload,
           });
+
+          const responseText = await resp.text();
+          console.log("Google Apps Script response status:", resp.status, "body:", responseText);
+
           if (resp.ok) {
             forwardedVia = "google_apps_script";
+          } else {
+            console.warn("Google Apps Script responded with non-200 status:", resp.status);
           }
         } catch (err) {
           console.error("Failed to forward to Google Apps Script:", err);
         }
+      } else {
+        console.warn("GOOGLE_SCRIPT_URL is not set or empty. Storing message in local memory only.");
       }
 
       return res.status(200).json({
