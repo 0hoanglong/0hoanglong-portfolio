@@ -125,74 +125,29 @@ async function startServer() {
       // Update rate limiter
       rateLimitMap.set(clientIp, now);
 
-      // Secure Backend Forwarding to Email Service (keys hidden on server)
+      // Secure Backend Forwarding to Google Apps Script (Google Sheets + Email)
       let forwardedVia = "local_memory";
-      const web3FormsKey = process.env.WEB3FORMS_ACCESS_KEY || "e2f1d090-5a02-431a-9be0-a3172aed9653";
-      const formspreeId = process.env.FORMSPREE_FORM_ID;
+      const googleScriptUrl = process.env.GOOGLE_SCRIPT_URL;
 
-      if (web3FormsKey && web3FormsKey.trim() !== "") {
+      if (googleScriptUrl && googleScriptUrl.trim() !== "") {
         try {
-          const resp = await fetch("https://api.web3forms.com/submit", {
+          const resp = await fetch(googleScriptUrl.trim(), {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Accept": "application/json",
-              "User-Agent": "Mozilla/5.0 (compatible; PortfolioBackend/1.0)",
-            },
-            body: JSON.stringify({
-              access_key: web3FormsKey.trim(),
-              subject: `[Portfolio Contact] Tin nhắn từ ${name}`,
-              from_name: name,
-              email: email || "no-reply@portfolio.dev",
-              phone: phone || "Không cung cấp",
-              message: message,
-              replyto: email || undefined,
-            }),
-          });
-
-          const rawText = await resp.text();
-          let result: any = null;
-          try {
-            result = JSON.parse(rawText);
-          } catch {
-            // Non-JSON response (e.g. HTML error/challenge page)
-          }
-
-          if (result && result.success) {
-            forwardedVia = "web3forms";
-          } else if (resp.ok) {
-            forwardedVia = "web3forms_ok";
-          } else {
-            console.warn("Web3Forms response not successful. Status:", resp.status);
-          }
-        } catch (err) {
-          console.error("Failed to forward email to Web3Forms:", err);
-        }
-      } else if (formspreeId && formspreeId.trim() !== "") {
-        try {
-          const resp = await fetch(`https://formspree.io/f/${formspreeId.trim()}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-              "User-Agent": "Mozilla/5.0 (compatible; PortfolioBackend/1.0)",
             },
             body: JSON.stringify({
               name,
-              email: email || "no-reply@portfolio.dev",
+              email: email || "Không cung cấp",
               phone: phone || "Không cung cấp",
               message,
-              _subject: `[Portfolio Contact] Tin nhắn từ ${name}`,
             }),
           });
-
           if (resp.ok) {
-            forwardedVia = "formspree";
-          } else {
-            console.warn("Formspree response not ok:", resp.status);
+            forwardedVia = "google_apps_script";
           }
         } catch (err) {
-          console.error("Failed to forward email to Formspree:", err);
+          console.error("Failed to forward to Google Apps Script:", err);
         }
       }
 

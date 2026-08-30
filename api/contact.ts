@@ -49,72 +49,29 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // 3. Secure backend forwarding (Keys hidden in Vercel Environment Variables)
-    const web3FormsKey = process.env.WEB3FORMS_ACCESS_KEY || "e2f1d090-5a02-431a-9be0-a3172aed9653";
-    const formspreeId = process.env.FORMSPREE_FORM_ID;
+    // 3. Secure backend forwarding to Google Apps Script (Google Sheets + Email)
+    const googleScriptUrl = process.env.GOOGLE_SCRIPT_URL;
     let deliveryStatus = "local_memory";
 
-    if (web3FormsKey && web3FormsKey.trim() !== "") {
+    if (googleScriptUrl && googleScriptUrl.trim() !== "") {
       try {
-        const resp = await fetch("https://api.web3forms.com/submit", {
+        const resp = await fetch(googleScriptUrl.trim(), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0 (compatible; PortfolioBackend/1.0)",
-          },
-          body: JSON.stringify({
-            access_key: web3FormsKey.trim(),
-            subject: `[Portfolio Contact] Tin nhắn mới từ ${name.trim()}`,
-            from_name: name.trim(),
-            email: email?.trim() || "no-reply@portfolio.dev",
-            phone: phone?.trim() || "Không cung cấp",
-            message: message.trim(),
-            replyto: email?.trim() || undefined,
-          }),
-        });
-
-        const rawText = await resp.text();
-        let result: any = null;
-        try {
-          result = JSON.parse(rawText);
-        } catch {
-          // Response was not JSON
-        }
-
-        if (result && result.success) {
-          deliveryStatus = "web3forms";
-        } else if (resp.ok) {
-          deliveryStatus = "web3forms_ok";
-        } else {
-          console.warn("Web3Forms response not successful. Status:", resp.status);
-        }
-      } catch (err) {
-        console.error("Vercel Serverless Web3Forms error:", err);
-      }
-    } else if (formspreeId && formspreeId.trim() !== "") {
-      try {
-        const resp = await fetch(`https://formspree.io/f/${formspreeId.trim()}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0 (compatible; PortfolioBackend/1.0)",
           },
           body: JSON.stringify({
             name: name.trim(),
-            email: email?.trim() || "no-reply@portfolio.dev",
+            email: email?.trim() || "Không cung cấp",
             phone: phone?.trim() || "Không cung cấp",
             message: message.trim(),
-            _subject: `[Portfolio Contact] Tin nhắn mới từ ${name.trim()}`,
           }),
         });
-
         if (resp.ok) {
-          deliveryStatus = "formspree";
+          deliveryStatus = "google_apps_script";
         }
       } catch (err) {
-        console.error("Vercel Serverless Formspree error:", err);
+        console.error("Vercel Serverless Google Apps Script error:", err);
       }
     }
 
