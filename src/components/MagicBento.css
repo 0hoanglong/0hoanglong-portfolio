@@ -1,0 +1,102 @@
+:root {
+  --magic-glow-color: 0, 210, 255;
+}
+
+:root[data-theme="red"] {
+  --magic-glow-color: 255, 77, 109;
+}
+
+:root[data-theme="yellow"] {
+  --magic-glow-color: 245, 158, 11;
+}
+
+:root[data-theme="green"] {
+  --magic-glow-color: 16, 185, 129;
+}
+
+:root[data-theme="purple"] {
+  --magic-glow-color: 168, 85, 247;
+}
+
+:root[data-theme="pink"] {
+  --magic-glow-color: 244, 63, 94;
+}
+
+.magic-card {
+  position: relative;
+  isolation: isolate;
+  --glow-x: 50%;
+  --glow-y: 50%;
+  --glow-intensity: 0;
+  --glow-radius: 260px;
+}
+
+/* Magic Card Border Glow Effect */
+.magic-card-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  background: radial-gradient(
+    var(--glow-radius, 260px) circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(var(--current-glow, var(--magic-glow-color)), calc(var(--glow-intensity, 0) * 0.95)) 0%,
+    rgba(var(--current-glow, var(--magic-glow-color)), calc(var(--glow-intensity, 0) * 0.45)) 35%,
+    transparent 70%
+  );
+  border-radius: inherit;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+  z-index: 10;
+}
+
+.magic-card-glow:hover::after {
+  opacity: 1;
+}
+
+/* Subtle background spotlight tint */
+.magic-card-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    var(--glow-radius, 260px) circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(var(--current-glow, var(--magic-glow-color)), calc(var(--glow-intensity, 0) * 0.08)) 0%,
+    transparent 65%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.particle-star {
+  position: absolute;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.particle-star::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: inherit;
+  opacity: 0.4;
+  border-radius: 50%;
+  filter: blur(1px);
+}

@@ -17,6 +17,8 @@ import {
 } from '../data/portfolioData';
 import { Language } from '../types';
 import { LofiPlayer } from './LofiPlayer';
+import { WarpText } from './WarpText';
+import { MagicCard } from './MagicCard';
 
 interface AboutSectionProps {
   onNavigate: (sectionId: string) => void;
@@ -78,11 +80,17 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate, language
         <div className="lg:col-span-7 flex flex-col gap-6">
           
           {/* Header Card: Avatar + Name + Badges */}
-          <div className="p-6 sm:p-7 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+          <MagicCard 
+            enableTilt={true} 
+            enableBorderGlow={true} 
+            enableStars={true} 
+            particleCount={10}
+            className="p-6 sm:p-7 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-2xl relative overflow-hidden group"
+          >
             {/* Ambient background glow */}
             <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
               {/* Profile Image with Glow Ring */}
               <div className="relative flex-shrink-0">
                 <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-accent shadow-accent-sm relative">
@@ -101,7 +109,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate, language
               </div>
 
               {/* Identity & School */}
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-accent-soft text-accent border border-accent-border uppercase tracking-wider">
                     {language === 'en' ? PERSONAL_INFO.titleEn : PERSONAL_INFO.titleVi}
@@ -112,12 +120,30 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate, language
                   </span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-display">
-                  {PERSONAL_INFO.name}
-                </h1>
+                {/* Name rendered with interactive WebGL WarpText (Left aligned, stronger glass refraction & wave) */}
+                <div className="w-full max-w-[360px] h-11 sm:h-12 relative flex items-center">
+                  <WarpText
+                    text={PERSONAL_INFO.name}
+                    color="#ffffff"
+                    warpStrength={0.16}
+                    warpScale={2.1}
+                    speed={0.75}
+                    pointerInfluence={0.52}
+                    pointerStrength={0.55}
+                    refraction={0.032}
+                    ripple
+                    align="left"
+                    fontSize="clamp(1.6rem, 3.8vw, 2.35rem)"
+                    fontWeight={800}
+                    fontFamily="Inter, system-ui, -apple-system, sans-serif"
+                    letterSpacing="-0.02em"
+                    className="w-full h-full"
+                    style={{ minHeight: '44px', height: '100%' }}
+                  />
+                </div>
 
                 {/* Social Quick Links */}
-                <div className="flex items-center gap-3 pt-1">
+                <div className="flex items-center gap-3 pt-0.5">
                   <a
                     href={PERSONAL_INFO.socials.github}
                     target="_blank"
@@ -186,21 +212,25 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate, language
                 <span>{t.btnContact}</span>
               </button>
             </div>
-          </div>
+          </MagicCard>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {stats.map((stat, idx) => (
-              <div
+              <MagicCard
                 key={idx}
-                className="p-4 rounded-2xl bg-slate-900/60 border border-white/10 backdrop-blur-md text-center hover:border-accent-border transition-colors group"
+                enableTilt={true}
+                enableBorderGlow={true}
+                enableStars={true}
+                particleCount={4}
+                className="p-4 rounded-2xl bg-slate-900/60 border border-white/10 backdrop-blur-md text-center group"
               >
                 <div className="text-xl sm:text-2xl font-black text-white font-display group-hover:text-accent transition-colors">
                   {stat.value}
                 </div>
                 <div className="text-xs font-bold text-slate-300 mt-0.5">{stat.label}</div>
                 <div className="text-[10px] text-slate-400 truncate">{stat.sub}</div>
-              </div>
+              </MagicCard>
             ))}
           </div>
         </div>
@@ -209,7 +239,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate, language
         <div className="lg:col-span-5 flex flex-col items-center gap-6">
           
           {/* Focus Areas Card */}
-          <div className="w-full max-w-sm p-4 sm:p-5 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-xl">
+          <MagicCard 
+            enableTilt={true}
+            enableBorderGlow={true}
+            enableStars={true}
+            particleCount={6}
+            className="w-full max-w-sm p-4 sm:p-5 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-xl"
+          >
             <div className="flex items-center gap-2 mb-3">
               <Compass className="w-4 h-4 text-accent" />
               <span className="text-xs font-bold uppercase tracking-wider text-accent">
@@ -226,7 +262,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate, language
                 </span>
               ))}
             </div>
-          </div>
+          </MagicCard>
 
           {/* Lofi Radio Player with YouTube IFrame API */}
           <LofiPlayer language={language} />

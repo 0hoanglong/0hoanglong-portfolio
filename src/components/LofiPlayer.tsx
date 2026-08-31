@@ -14,6 +14,7 @@ import {
 import { PERSONAL_INFO, UI_TRANSLATIONS } from '../data/portfolioData';
 import { Language } from '../types';
 import { useLofi } from '../context/LofiContext';
+import { MagicCard } from './MagicCard';
 
 interface LofiPlayerProps {
   language: Language;
@@ -46,7 +47,13 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ language }) => {
   };
 
   return (
-    <div className="w-full max-w-sm rounded-3xl p-4 bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+    <MagicCard 
+      enableTilt={true}
+      enableBorderGlow={true}
+      enableStars={true}
+      particleCount={6}
+      className="w-full max-w-sm rounded-3xl p-4 bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
+    >
       {/* Top Header info */}
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
@@ -214,6 +221,6 @@ export const LofiPlayer: React.FC<LofiPlayerProps> = ({ language }) => {
           </span>
         </div>
       </div>
-    </div>
+    </MagicCard>
   );
 };

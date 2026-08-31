@@ -24,6 +24,7 @@ import {
 import confetti from 'canvas-confetti';
 import { PERSONAL_INFO, UI_TRANSLATIONS } from '../data/portfolioData';
 import { ContactMessage, Language } from '../types';
+import { MagicCard } from './MagicCard';
 
 interface ContactSectionProps {
   language: Language;
@@ -426,7 +427,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
         
         {/* Left Column: Direct Contact Info, Quick Call CTA & Socials */}
         <div className="lg:col-span-5 flex flex-col gap-5">
-          <div className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-xl space-y-6">
+          <MagicCard 
+            enableTilt={true}
+            enableBorderGlow={true}
+            enableStars={true}
+            particleCount={8}
+            className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-xl space-y-6"
+          >
             <div>
               <span className="text-xs font-bold text-accent uppercase tracking-wider">
                 {t.letsTalk}
@@ -560,12 +567,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
                 </a>
               </div>
             </div>
-          </div>
+          </MagicCard>
         </div>
 
         {/* Right Column: Secure Interactive Contact Form with Dynamic Flex Widths */}
         <div className="lg:col-span-7">
-          <div className="p-6 sm:p-7 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          <MagicCard 
+            enableTilt={true}
+            enableBorderGlow={true}
+            enableStars={true}
+            particleCount={10}
+            className="p-6 sm:p-7 rounded-3xl bg-slate-900/70 border border-white/10 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+          >
             
             {/* Form Title & Security Badge */}
             <div className="flex items-center justify-between mb-5">
@@ -832,7 +845,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
                 )}
               </button>
             </form>
-          </div>
+          </MagicCard>
         </div>
 
       </div>

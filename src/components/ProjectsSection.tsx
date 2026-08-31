@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { PROJECTS_DATA, UI_TRANSLATIONS } from '../data/portfolioData';
 import { ProjectItem, Language } from '../types';
+import { MagicCard } from './MagicCard';
 
 interface ProjectsSectionProps {
   language: Language;
@@ -75,9 +76,13 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ language }) =>
           const description = language === 'en' ? project.descriptionEn : project.descriptionVi;
 
           return (
-            <div
+            <MagicCard
               key={project.id}
-              className="group rounded-3xl bg-slate-900/70 border border-white/10 overflow-hidden backdrop-blur-xl shadow-xl flex flex-col justify-between hover:border-accent-border transition-all duration-300 hover:-translate-y-1.5"
+              enableTilt={true}
+              enableBorderGlow={true}
+              enableStars={true}
+              particleCount={6}
+              className="group rounded-3xl bg-slate-900/70 border border-white/10 overflow-hidden backdrop-blur-xl shadow-xl flex flex-col justify-between transition-all duration-300"
             >
               {/* Image Preview Container */}
               <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
@@ -170,7 +175,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ language }) =>
                   </div>
                 </div>
               </div>
-            </div>
+            </MagicCard>
           );
         })}
       </div>

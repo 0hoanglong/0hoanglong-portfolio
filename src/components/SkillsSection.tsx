@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { SKILLS_DATA, UI_TRANSLATIONS } from '../data/portfolioData';
 import { SkillItem, Language } from '../types';
+import { MagicCard } from './MagicCard';
 
 interface SkillsSectionProps {
   language: Language;
@@ -160,10 +161,14 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ language }) => {
           const tags = language === 'en' ? skill.tagsEn : skill.tagsVi;
 
           return (
-            <div
+            <MagicCard
               key={skill.id}
+              enableTilt={true}
+              enableBorderGlow={true}
+              enableStars={true}
+              particleCount={5}
               onClick={() => setActiveSkill(isSelected ? null : skill)}
-              className={`p-4 sm:p-5 rounded-2xl bg-slate-900/70 border backdrop-blur-xl transition-all duration-300 cursor-pointer group hover:-translate-y-1 ${
+              className={`p-4 sm:p-5 rounded-2xl bg-slate-900/70 border backdrop-blur-xl transition-all duration-300 cursor-pointer group ${
                 isSelected
                   ? 'border-accent shadow-accent-sm bg-slate-900/90'
                   : 'border-white/10 hover:border-white/25 hover:bg-slate-900/80'
@@ -226,7 +231,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ language }) => {
                   </span>
                 ))}
               </div>
-            </div>
+            </MagicCard>
           );
         })}
       </div>
@@ -244,7 +249,12 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ language }) => {
       )}
 
       {/* Bottom Summary Bar */}
-      <div className="mt-8 p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-950 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
+      <MagicCard 
+        enableTilt={false}
+        enableBorderGlow={true}
+        enableStars={false}
+        className="mt-8 p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-950 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300"
+      >
         <div className="flex items-center gap-2">
           <CheckCircle className="w-4 h-4 text-emerald-400" />
           <span>{t.bottomSummary}</span>
@@ -252,7 +262,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ language }) => {
         <div className="flex items-center gap-2 font-mono text-slate-400">
           <span>{t.totalSkills} <strong className="text-white">{SKILLS_DATA.length}</strong> {t.skillsCount}</span>
         </div>
-      </div>
+      </MagicCard>
     </section>
   );
 };
