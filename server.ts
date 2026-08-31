@@ -87,15 +87,57 @@ async function startServer() {
       if (!email && !phone) {
         return res.status(400).json({
           success: false,
-          message: "Vui lòng cung cấp ít nhất 1 phương thức liên hệ (Email hoặc Số điện thoại).",
+          message: "Vui lòng cung cấp ít nhất 1 phương thức liên hệ (Email hoặc Số điện thoại 10 số).",
         });
       }
 
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      // Email validation: must have @ and domain name
+      const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (email && !EMAIL_REGEX.test(email)) {
         return res.status(400).json({
           success: false,
-          message: "Định dạng email không hợp lệ. Vui lòng kiểm tra lại.",
+          message: "Định dạng email không hợp lệ (cần có ký tự @ và tên miền, ví dụ: name@gmail.com).",
         });
+      }
+
+      // Phone validation
+      if (phone) {
+        const cleanPhone = phone.replace(/[\s.\-()]/g, '');
+        if (cleanPhone.startsWith('+84')) {
+          const afterCode = cleanPhone.slice(3);
+          if (!/^[1-9][0-9]{8}$/.test(afterCode)) {
+            return res.status(400).json({
+              success: false,
+              message: "Số điện thoại (+84) cần có 9 chữ số theo sau (ví dụ: +84 912 345 678).",
+            });
+          }
+        } else if (cleanPhone.startsWith('0')) {
+          if (!/^0[1-9][0-9]{8}$/.test(cleanPhone)) {
+            return res.status(400).json({
+              success: false,
+              message: "Số điện thoại Việt Nam cần đủ 10 chữ số bắt đầu bằng số 0 (ví dụ: 0912 345 678).",
+            });
+          }
+        } else if (cleanPhone.startsWith('+')) {
+          // International phone number
+          if (!/^\+[1-9][0-9]{6,14}$/.test(cleanPhone)) {
+            return res.status(400).json({
+              success: false,
+              message: "Định dạng số điện thoại quốc tế không hợp lệ.",
+            });
+          }
+          if (!email) {
+            return res.status(400).json({
+              success: false,
+              message: "Số điện thoại quốc tế cần kèm theo địa chỉ Email để chúng tôi phản hồi lại bạn.",
+            });
+          }
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: "Số điện thoại không hợp lệ (cần đủ 10 chữ số bắt đầu bằng 0 hoặc +84).",
+          });
+        }
       }
 
       if (!message || message.length < 5) {

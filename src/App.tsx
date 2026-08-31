@@ -116,7 +116,7 @@ export default function App() {
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 md:ml-20 transition-all duration-300 min-h-screen pt-16 pb-20 md:pt-0 md:pb-0 relative z-10 flex flex-col justify-center">
+        <main className="flex-1 md:ml-20 transition-all duration-300 min-h-screen pt-16 pb-24 md:pt-0 md:pb-0 relative z-10 flex flex-col justify-center">
           <AnimatePresence mode="wait">
             {activeSection === 'about' && (
               <motion.div

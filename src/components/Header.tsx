@@ -85,7 +85,10 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.theme-switcher-container')) {
+      if (
+        !target.closest('.theme-switcher-container') && 
+        !target.closest('.mobile-theme-container')
+      ) {
         setIsThemeMenuOpen(false);
       }
     };
@@ -159,9 +162,12 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </button>
 
-            {/* Theme Dropdown Menu */}
+            {/* Desktop Theme Dropdown Menu */}
             {isThemeMenuOpen && (
-              <div className="absolute top-0 left-full ml-3 p-3 bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-2xl w-48 z-50 animate-in fade-in zoom-in-95 duration-200">
+              <div 
+                onClick={(e) => e.stopPropagation()}
+                className="absolute top-0 left-full ml-3 p-3 bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-2xl w-48 z-50 animate-in fade-in zoom-in-95 duration-200"
+              >
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">
                   {t.chooseTheme}
                 </p>
@@ -171,7 +177,8 @@ export const Header: React.FC<HeaderProps> = ({
                     return (
                       <button
                         key={theme.id}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           onThemeChange(theme.id);
                           setIsThemeMenuOpen(false);
                         }}
@@ -234,7 +241,7 @@ export const Header: React.FC<HeaderProps> = ({
           </ul>
         </nav>
 
-        {/* Bottom Actions: Language Switcher (Replaced Host Guide Button) */}
+        {/* Bottom Actions: Language Switcher */}
         <div className="p-3 border-t border-white/10 flex flex-col gap-2">
           {/* Prominent Language Switcher Button */}
           <button
@@ -275,86 +282,136 @@ export const Header: React.FC<HeaderProps> = ({
       </aside>
 
       {/* Mobile Top Header */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-slate-950/85 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-white/10 px-3.5 py-2.5 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full border-2 border-accent overflow-hidden">
+          <div className="w-8 h-8 rounded-full border-2 border-accent overflow-hidden shadow-sm flex-shrink-0">
             <img
               src="https://0hoanglong.zone.id/portfolio-long-v20-spa-new/avt.jpg"
               alt="Avatar"
               className="w-full h-full object-cover"
             />
           </div>
-          <div>
-            <h1 className="text-sm font-bold text-white leading-tight">Trần Hoàng Long</h1>
-            <p className="text-[10px] text-accent font-medium">Frontend Developer</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold text-white leading-tight truncate">Trần Hoàng Long</h1>
+            <p className="text-[10px] text-accent font-medium truncate">Frontend Developer</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Mobile Theme Switcher */}
-          <button
-            onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-accent cursor-pointer"
-            aria-label="Change theme accent color"
-          >
-            <Palette className="w-4 h-4" />
-          </button>
+          <div className="relative mobile-theme-container">
+            <button
+              id="mobile-theme-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsThemeMenuOpen(!isThemeMenuOpen);
+              }}
+              className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 text-accent cursor-pointer transition-all flex items-center justify-center"
+              aria-label="Change theme accent color"
+              title={t.theme}
+            >
+              <Palette className="w-4 h-4" />
+              <span
+                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-slate-950 shadow-sm"
+                style={{ backgroundColor: THEME_OPTIONS.find((th) => th.id === currentTheme)?.color }}
+              />
+            </button>
+
+            {/* Mobile Theme Dropdown Floating */}
+            {isThemeMenuOpen && (
+              <div 
+                onClick={(e) => e.stopPropagation()}
+                className="absolute top-12 right-0 p-3.5 bg-slate-900/98 border border-white/20 rounded-2xl shadow-2xl backdrop-blur-2xl w-48 z-50 animate-in fade-in zoom-in-95 duration-150"
+              >
+                <div className="flex items-center justify-between mb-2.5 px-0.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    {t.chooseTheme}
+                  </p>
+                  <span className="text-[9px] font-mono text-accent uppercase">
+                    {currentTheme}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {THEME_OPTIONS.map((theme) => {
+                    const isActive = currentTheme === theme.id;
+                    return (
+                      <button
+                        key={theme.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onThemeChange(theme.id);
+                          setIsThemeMenuOpen(false);
+                        }}
+                        className={`p-2 rounded-xl flex flex-col items-center gap-1.5 border transition-all cursor-pointer active:scale-95 ${
+                          isActive 
+                            ? 'border-white/50 bg-white/20 shadow-sm ring-1 ring-white/50' 
+                            : 'border-white/10 hover:border-white/30 bg-white/5'
+                        }`}
+                        title={theme.name}
+                      >
+                        <span
+                          className={`w-5 h-5 rounded-full shadow-md transition-transform ${
+                            isActive ? 'scale-110 ring-2 ring-white ring-offset-1 ring-offset-slate-900' : ''
+                          }`}
+                          style={{ backgroundColor: theme.color }}
+                        />
+                        <span className="text-[9px] text-slate-300 font-medium truncate max-w-full">
+                          {theme.name.split(' ')[0]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Mobile Language Switcher Button */}
           <button
+            id="mobile-lang-btn"
             onClick={onToggleLanguage}
-            className="px-2.5 py-1.5 rounded-lg bg-accent-soft border border-accent-border text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-95"
+            className="px-2.5 py-1.5 rounded-xl bg-accent-soft hover:bg-accent-soft/80 border border-accent-border text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-sm"
             aria-label="Toggle language"
+            title={t.switchLang}
           >
-            <Globe className="w-3.5 h-3.5 text-accent" />
+            <Globe className="w-3.5 h-3.5 text-accent flex-shrink-0" />
             <span className="uppercase text-[11px] font-extrabold">{language === 'en' ? 'VI' : 'EN'}</span>
           </button>
         </div>
       </header>
 
-      {/* Mobile Theme Dropdown Floating */}
-      {isThemeMenuOpen && (
-        <div className="md:hidden fixed top-16 right-4 p-3 bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-2xl w-44 z-50 animate-in fade-in">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-            {t.chooseTheme}
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {THEME_OPTIONS.map((theme) => (
-              <button
-                key={theme.id}
-                onClick={() => {
-                  onThemeChange(theme.id);
-                  setIsThemeMenuOpen(false);
-                }}
-                className={`p-1.5 rounded-lg flex flex-col items-center gap-1 border ${
-                  currentTheme === theme.id ? 'border-white bg-white/10' : 'border-white/5'
-                }`}
-              >
-                <span
-                  className="w-5 h-5 rounded-full"
-                  style={{ backgroundColor: theme.color }}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-xl border-t border-white/10 px-3 py-2 flex justify-around items-center">
+      <nav 
+        aria-label="Mobile Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-2xl border-t border-white/10 px-2 py-1.5 flex justify-around items-center shadow-2xl"
+      >
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
           return (
             <button
               key={item.id}
-              onClick={() => onSectionChange(item.id)}
-              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all cursor-pointer ${
-                isActive ? 'text-accent' : 'text-slate-400 hover:text-slate-200'
+              onClick={() => {
+                onSectionChange(item.id);
+                // Also close any open popup
+                setIsThemeMenuOpen(false);
+              }}
+              className={`relative flex flex-col items-center justify-center py-1 px-3.5 rounded-xl transition-all cursor-pointer active:scale-90 ${
+                isActive 
+                  ? 'text-white bg-accent-soft/60 border border-accent-border/50 shadow-accent-sm' 
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon 
+                className={`w-5 h-5 transition-transform ${
+                  isActive ? 'text-accent scale-110' : 'text-slate-400'
+                }`} 
+              />
+              <span className={`text-[10px] font-semibold mt-0.5 tracking-tight ${
+                isActive ? 'text-white' : 'text-slate-400'
+              }`}>
+                {item.label}
+              </span>
             </button>
           );
         })}

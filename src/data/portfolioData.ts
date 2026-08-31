@@ -35,18 +35,18 @@ export const PERSONAL_INFO = {
     { value: '24/7', label: 'Học Hỏi & Đổi Mới', sub: 'Cập nhật công nghệ mới' },
   ],
   focusAreasEn: [
-    'UI/UX Design',
-    'React & TypeScript',
-    'Modern CSS & Tailwind',
-    'Interactive Animations',
-    'Clean Architecture',
+    'Vibe Coding & AI Prompting',
+    'Vibe Designing & Creative UI',
+    'React & Modern Web',
+    'Tailwind & Motion FX',
+    'AI-Assisted Architecture',
   ],
   focusAreasVi: [
-    'Thiết kế UI/UX',
-    'React & TypeScript',
-    'CSS Hiện đại & Tailwind',
-    'Hiệu ứng Chuyển động',
-    'Kiến trúc Code Tinh gọn',
+    'Vibe Coding & AI Workflow',
+    'Vibe Designing & UI Sáng tạo',
+    'React & Web Hiện đại',
+    'Tailwind & Animation',
+    'Kiến trúc & Tối ưu AI',
   ],
 };
 

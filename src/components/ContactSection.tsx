@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Mail, 
   Phone, 
@@ -17,7 +17,9 @@ import {
   Facebook,
   Github,
   Instagram,
-  RefreshCw
+  RefreshCw,
+  Info,
+  Globe
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { PERSONAL_INFO, UI_TRANSLATIONS } from '../data/portfolioData';
@@ -31,6 +33,75 @@ interface ContactSectionProps {
 const DRAFT_STORAGE_KEY = 'hoanglong_portfolio_contact_draft';
 const COOLDOWN_STORAGE_KEY = 'hoanglong_portfolio_last_sent_time';
 const COOLDOWN_SECONDS = 180; // 3 minutes
+
+// Validation helper functions
+export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+export type PhoneValidationResult = 
+  | { type: 'empty' }
+  | { type: 'valid_vn'; formatted: string }
+  | { type: 'international'; countryCode: string }
+  | { type: 'invalid'; errorVi: string; errorEn: string };
+
+export function evaluatePhoneNumber(rawPhone: string): PhoneValidationResult {
+  const trimmed = rawPhone.trim();
+  if (!trimmed) {
+    return { type: 'empty' };
+  }
+
+  // Remove spaces, hyphens, dots, parentheses
+  const clean = trimmed.replace(/[\s.\-()]/g, '');
+
+  // 1. Vietnamese number with +84 prefix
+  if (clean.startsWith('+84')) {
+    const afterCode = clean.slice(3);
+    // Standard VN mobile numbers have 9 digits after +84 (starting with 3, 5, 7, 8, 9, 2)
+    if (/^[1-9][0-9]{8}$/.test(afterCode)) {
+      return { type: 'valid_vn', formatted: clean };
+    }
+    return {
+      type: 'invalid',
+      errorVi: 'Số điện thoại (+84) cần có 9 chữ số theo sau (Ví dụ: +84 912 345 678).',
+      errorEn: 'Phone number with +84 must have 9 digits following (e.g. +84 912 345 678).'
+    };
+  }
+
+  // 2. Vietnamese standard 10-digit number starting with 0
+  if (clean.startsWith('0')) {
+    if (/^0[1-9][0-9]{8}$/.test(clean)) {
+      return { type: 'valid_vn', formatted: clean };
+    }
+    return {
+      type: 'invalid',
+      errorVi: 'Số điện thoại Việt Nam cần đủ đúng 10 chữ số bắt đầu bằng số 0 (Ví dụ: 0912 345 678).',
+      errorEn: 'Vietnamese phone number must have exactly 10 digits starting with 0 (e.g. 0912 345 678).'
+    };
+  }
+
+  // 3. International phone numbers starting with + (not +84)
+  if (clean.startsWith('+')) {
+    // Check if it's a plausible international phone number (7 to 15 digits)
+    if (/^\+[1-9][0-9]{6,14}$/.test(clean)) {
+      const match = clean.match(/^\+(\d{1,4})/);
+      return { 
+        type: 'international', 
+        countryCode: match ? match[1] : 'int'
+      };
+    }
+    return {
+      type: 'invalid',
+      errorVi: 'Định dạng số điện thoại quốc tế không hợp lệ (Ví dụ: +1 415 555 2671).',
+      errorEn: 'Invalid international phone number format (e.g. +1 415 555 2671).'
+    };
+  }
+
+  // 4. Any other non-standard / short numbers (e.g., 113, 114, 115, random characters)
+  return {
+    type: 'invalid',
+    errorVi: 'Số điện thoại không hợp lệ. Vui lòng nhập đủ 10 chữ số (bắt đầu bằng 0) hoặc mã quốc tế (+84 / +XY).',
+    errorEn: 'Invalid phone number. Please enter a 10-digit number (starting with 0) or country code (+84 / +XY).'
+  };
+}
 
 export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShowToast }) => {
   const t = UI_TRANSLATIONS[language].contact;
@@ -50,6 +121,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Real-time phone evaluation
+  const phoneEvaluation = useMemo(() => evaluatePhoneNumber(formData.phone), [formData.phone]);
+  const isInternationalPhone = phoneEvaluation.type === 'international';
 
   // Admin / Test Inbox Modal State
   const [isInboxModalOpen, setIsInboxModalOpen] = useState<boolean>(false);
@@ -113,39 +188,67 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
       return updated;
     });
 
-    // Clear error for edited field
-    if (fieldErrors[name]) {
-      setFieldErrors((prev) => {
-        const next = { ...prev };
-        delete next[name];
-        return next;
-      });
-    }
+    // Clear errors for edited field
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      if (name === 'phone' || name === 'email') {
+        delete next.contact;
+      }
+      return next;
+    });
   };
 
-  // Validate form client-side
+  // Validate form client-side with strict phone & email rules
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
 
+    // 1. Name validation
     if (!formData.name.trim()) {
       errors.name = language === 'en' ? 'Please enter your full name.' : 'Vui lòng nhập họ và tên của bạn.';
     }
 
-    const hasEmail = Boolean(formData.email.trim());
-    const hasPhone = Boolean(formData.phone.trim());
+    const phoneTrimmed = formData.phone.trim();
+    const emailTrimmed = formData.email.trim();
 
+    const phoneEval = evaluatePhoneNumber(phoneTrimmed);
+    const hasEmail = Boolean(emailTrimmed);
+    const hasPhone = phoneEval.type !== 'empty';
+
+    // 2. Require at least one contact channel
     if (!hasEmail && !hasPhone) {
       errors.contact =
         language === 'en'
-          ? 'Please provide at least an Email address or Phone number.'
-          : 'Vui lòng cung cấp ít nhất Email hoặc Số điện thoại để liên hệ.';
+          ? 'Please provide an Email address or a 10-digit Phone number.'
+          : 'Vui lòng cung cấp Email hoặc Số điện thoại (10 chữ số) để liên hệ.';
     }
 
-    if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email =
-        language === 'en' ? 'Please enter a valid email address.' : 'Địa chỉ email không đúng định dạng.';
+    // 3. Phone validation
+    if (hasPhone) {
+      if (phoneEval.type === 'invalid') {
+        errors.phone = language === 'en' ? phoneEval.errorEn : phoneEval.errorVi;
+      } else if (phoneEval.type === 'international') {
+        // International number requires email for reliable responses
+        if (!hasEmail) {
+          errors.email =
+            language === 'en'
+              ? 'International phone number detected. Please also provide your Email so we can reach you.'
+              : 'Số điện thoại quốc tế (+XY) cần kèm theo địa chỉ Email để Hoàng Long có thể phản hồi lại bạn.';
+        }
+      }
     }
 
+    // 4. Email validation
+    if (hasEmail) {
+      if (!EMAIL_REGEX.test(emailTrimmed)) {
+        errors.email =
+          language === 'en'
+            ? 'Please enter a valid email address with @ and domain (e.g. name@gmail.com).'
+            : 'Địa chỉ email không đúng định dạng (cần có ký tự @ và tên miền, ví dụ: name@gmail.com).';
+      }
+    }
+
+    // 5. Message validation
     if (!formData.message.trim()) {
       errors.message =
         language === 'en' ? 'Please enter your message.' : 'Vui lòng nhập nội dung tin nhắn.';
@@ -536,31 +639,50 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
                         : 'sm:w-1/2 sm:flex-1'
                     }`}
                   >
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onFocus={() => setActiveFocusField('phone')}
-                      onBlur={() => {
-                        setTimeout(() => {
-                          const activeElName = document.activeElement?.getAttribute('name');
-                          if (activeElName === 'email') {
-                            setActiveFocusField('email');
-                          } else if (activeElName !== 'phone') {
-                            setActiveFocusField('none');
-                          }
-                        }, 50);
-                      }}
-                      onChange={handleInputChange}
-                      placeholder={t.phonePlaceholder}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-white/5 border text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
-                        fieldErrors.contact
-                          ? 'border-rose-500 bg-rose-500/10'
-                          : activeFocusField === 'phone'
-                          ? 'border-accent bg-white/10 ring-2 ring-accent/20'
-                          : 'border-white/10 hover:border-white/20'
-                      }`}
-                    />
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onFocus={() => setActiveFocusField('phone')}
+                        onBlur={() => {
+                          setTimeout(() => {
+                            const activeElName = document.activeElement?.getAttribute('name');
+                            if (activeElName === 'email') {
+                              setActiveFocusField('email');
+                            } else if (activeElName !== 'phone') {
+                              setActiveFocusField('none');
+                            }
+                          }, 50);
+                        }}
+                        onChange={handleInputChange}
+                        placeholder={t.phonePlaceholder}
+                        className={`w-full px-4 py-2.5 rounded-xl bg-white/5 border text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
+                          fieldErrors.contact || fieldErrors.phone
+                            ? 'border-rose-500 bg-rose-500/10'
+                            : activeFocusField === 'phone'
+                            ? 'border-accent bg-white/10 ring-2 ring-accent/20'
+                            : 'border-white/10 hover:border-white/20'
+                        }`}
+                      />
+                      {phoneEvaluation.type === 'valid_vn' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] text-emerald-400 pointer-events-none">
+                          <Check className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline font-mono">VN</span>
+                        </div>
+                      )}
+                      {isInternationalPhone && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] text-amber-400 pointer-events-none">
+                          <Globe className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline font-mono">INTL</span>
+                        </div>
+                      )}
+                    </div>
+                    {fieldErrors.phone && (
+                      <p className="text-rose-400 text-xs mt-1.5 flex items-center gap-1 leading-snug">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> {fieldErrors.phone}
+                      </p>
+                    )}
                   </div>
 
                   {/* Email Field Wrapper (Dynamic 70% / 30% width) */}
@@ -573,42 +695,66 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
                         : 'sm:w-1/2 sm:flex-1'
                     }`}
                   >
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onFocus={() => setActiveFocusField('email')}
-                      onBlur={() => {
-                        setTimeout(() => {
-                          const activeElName = document.activeElement?.getAttribute('name');
-                          if (activeElName === 'phone') {
-                            setActiveFocusField('phone');
-                          } else if (activeElName !== 'email') {
-                            setActiveFocusField('none');
-                          }
-                        }, 50);
-                      }}
-                      onChange={handleInputChange}
-                      placeholder={t.emailPlaceholder}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-white/5 border text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
-                        fieldErrors.contact || fieldErrors.email
-                          ? 'border-rose-500 bg-rose-500/10'
-                          : activeFocusField === 'email'
-                          ? 'border-accent bg-white/10 ring-2 ring-accent/20'
-                          : 'border-white/10 hover:border-white/20'
-                      }`}
-                    />
+                    <div className="relative">
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onFocus={() => setActiveFocusField('email')}
+                        onBlur={() => {
+                          setTimeout(() => {
+                            const activeElName = document.activeElement?.getAttribute('name');
+                            if (activeElName === 'phone') {
+                              setActiveFocusField('phone');
+                            } else if (activeElName !== 'email') {
+                              setActiveFocusField('none');
+                            }
+                          }, 50);
+                        }}
+                        onChange={handleInputChange}
+                        placeholder={t.emailPlaceholder}
+                        className={`w-full px-4 py-2.5 rounded-xl bg-white/5 border text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
+                          fieldErrors.contact || fieldErrors.email
+                            ? 'border-rose-500 bg-rose-500/10'
+                            : activeFocusField === 'email'
+                            ? 'border-accent bg-white/10 ring-2 ring-accent/20'
+                            : 'border-white/10 hover:border-white/20'
+                        }`}
+                      />
+                      {EMAIL_REGEX.test(formData.email.trim()) && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-emerald-400 pointer-events-none">
+                          <Check className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                    </div>
+                    {fieldErrors.email && (
+                      <p className="text-rose-400 text-xs mt-1.5 flex items-center gap-1 leading-snug">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> {fieldErrors.email}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {fieldErrors.contact && (
-                  <p className="text-rose-400 text-xs mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.contact}
-                  </p>
+                {/* International Phone Notice Callout */}
+                {isInternationalPhone && (
+                  <div className="mt-2.5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
+                    <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">
+                      <p className="font-semibold text-amber-300">
+                        {language === 'en' ? 'International phone number detected' : 'Phát hiện số điện thoại quốc tế (+XY)'}
+                      </p>
+                      <p className="text-[11px] text-amber-200/90 mt-0.5">
+                        {language === 'en'
+                          ? 'This is not a Vietnamese phone number (+84). Please also provide your Email address so Hoàng Long can respond to you smoothly.'
+                          : 'Đây không phải là số điện thoại Việt Nam (+84), vui lòng nhập thêm địa chỉ Email để Hoàng Long có thể phản hồi cho bạn qua thư điện tử.'}
+                      </p>
+                    </div>
+                  </div>
                 )}
-                {fieldErrors.email && (
-                  <p className="text-rose-400 text-xs mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.email}
+
+                {fieldErrors.contact && (
+                  <p className="text-rose-400 text-xs mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> {fieldErrors.contact}
                   </p>
                 )}
               </div>
