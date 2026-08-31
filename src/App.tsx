@@ -11,16 +11,6 @@ import { ContactSection } from './components/ContactSection';
 import { ToastContainer } from './components/ToastContainer';
 import { LofiProvider } from './context/LofiContext';
 import { LofiMiniPlayer } from './components/LofiMiniPlayer';
-import GlowCursor from './components/GlowCursor';
-
-const THEME_GLOW_COLORS: Record<ThemeColor, { color: string; secondaryColor: string }> = {
-  blue: { color: '#00d2ff', secondaryColor: '#818cf8' },
-  red: { color: '#ff4d6d', secondaryColor: '#f59e0b' },
-  yellow: { color: '#f59e0b', secondaryColor: '#ff4d6d' },
-  green: { color: '#10b981', secondaryColor: '#00d2ff' },
-  purple: { color: '#c084fc', secondaryColor: '#f43f5e' },
-  pink: { color: '#f43f5e', secondaryColor: '#a855f7' },
-};
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<string>('about');
@@ -109,118 +99,95 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSection]);
 
-  const currentGlow = THEME_GLOW_COLORS[currentTheme] || THEME_GLOW_COLORS.blue;
-
   return (
     <LofiProvider>
-      <GlowCursor
-        color={currentGlow.color}
-        secondaryColor={currentGlow.secondaryColor}
-        trailLength={38}
-        trailWidth={7}
-        trailTaper={0.78}
-        followSpeed={0.18}
-        glowIntensity={1.85}
-        glowSpread={1.25}
-        hotspot={0.65}
-        brightness={1.2}
-        opacity={1}
-        pulseSpeed={1.1}
-        noiseStrength={0.03}
-        idleFade={true}
-        idleTimeout={750}
-        fadeDuration={850}
-        blendMode="screen"
-        className="w-full min-h-screen"
-      >
-        <div className="min-h-screen bg-[#090a0f] text-slate-100 relative overflow-x-hidden flex flex-col md:flex-row">
-          {/* Cosmic Animated Starfield Background */}
-          <CosmicBackground />
+      <div className="min-h-screen bg-[#090a0f] text-slate-100 relative overflow-x-hidden flex flex-col md:flex-row">
+        {/* Cosmic Animated Starfield Background */}
+        <CosmicBackground />
 
-          {/* Navigation Header / Sidebar */}
-          <Header
-            activeSection={activeSection}
-            onSectionChange={setActiveSection}
-            currentTheme={currentTheme}
-            onThemeChange={handleThemeChange}
-            language={language}
-            onToggleLanguage={handleToggleLanguage}
-          />
+        {/* Navigation Header / Sidebar */}
+        <Header
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+          currentTheme={currentTheme}
+          onThemeChange={handleThemeChange}
+          language={language}
+          onToggleLanguage={handleToggleLanguage}
+        />
 
-          {/* Main Content Area */}
-          <main className="flex-1 md:ml-20 transition-all duration-300 min-h-screen pt-16 pb-24 md:pt-0 md:pb-0 relative z-10 flex flex-col justify-center">
-            <AnimatePresence mode="wait">
-              {activeSection === 'about' && (
-                <motion.div
-                  key="about"
-                  initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="w-full h-full"
-                >
-                  <AboutSection
-                    onNavigate={setActiveSection}
-                    language={language}
-                  />
-                </motion.div>
-              )}
+        {/* Main Content Area */}
+        <main className="flex-1 md:ml-20 transition-all duration-300 min-h-screen pt-16 pb-24 md:pt-0 md:pb-0 relative z-10 flex flex-col justify-center">
+          <AnimatePresence mode="wait">
+            {activeSection === 'about' && (
+              <motion.div
+                key="about"
+                initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="w-full h-full"
+              >
+                <AboutSection
+                  onNavigate={setActiveSection}
+                  language={language}
+                />
+              </motion.div>
+            )}
 
-              {activeSection === 'skills' && (
-                <motion.div
-                  key="skills"
-                  initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="w-full h-full"
-                >
-                  <SkillsSection language={language} />
-                </motion.div>
-              )}
+            {activeSection === 'skills' && (
+              <motion.div
+                key="skills"
+                initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="w-full h-full"
+              >
+                <SkillsSection language={language} />
+              </motion.div>
+            )}
 
-              {activeSection === 'projects' && (
-                <motion.div
-                  key="projects"
-                  initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="w-full h-full"
-                >
-                  <ProjectsSection language={language} />
-                </motion.div>
-              )}
+            {activeSection === 'projects' && (
+              <motion.div
+                key="projects"
+                initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="w-full h-full"
+              >
+                <ProjectsSection language={language} />
+              </motion.div>
+            )}
 
-              {activeSection === 'contact' && (
-                <motion.div
-                  key="contact"
-                  initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="w-full h-full"
-                >
-                  <ContactSection
-                    language={language}
-                    onShowToast={showToast}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </main>
+            {activeSection === 'contact' && (
+              <motion.div
+                key="contact"
+                initial={{ opacity: 0, y: 25, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -25, filter: 'blur(8px)' }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="w-full h-full"
+              >
+                <ContactSection
+                  language={language}
+                  onShowToast={showToast}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
 
-          {/* Global Floating Mini Lofi Player when on other sections */}
-          <LofiMiniPlayer
-            language={language}
-            onNavigate={setActiveSection}
-            activeSection={activeSection}
-          />
+        {/* Global Floating Mini Lofi Player when on other sections */}
+        <LofiMiniPlayer
+          language={language}
+          onNavigate={setActiveSection}
+          activeSection={activeSection}
+        />
 
-          {/* Floating Toast Notification Container */}
-          <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-        </div>
-      </GlowCursor>
+        {/* Floating Toast Notification Container */}
+        <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+      </div>
     </LofiProvider>
   );
 }
