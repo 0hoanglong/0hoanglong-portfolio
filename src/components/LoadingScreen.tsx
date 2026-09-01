@@ -58,7 +58,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 1400; // 1.4s total load duration for quick, pleasant UX
+    const duration = 2800; // ~2.8s total load duration for comfortable viewing
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -66,17 +66,17 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
       setProgress(rawPct);
 
-      if (rawPct >= 85) {
+      if (rawPct >= 88) {
         setCurrentStepIndex(3);
-      } else if (rawPct >= 55) {
+      } else if (rawPct >= 58) {
         setCurrentStepIndex(2);
-      } else if (rawPct >= 25) {
+      } else if (rawPct >= 28) {
         setCurrentStepIndex(1);
       } else {
         setCurrentStepIndex(0);
       }
 
-      if (elapsed >= duration + 150) {
+      if (elapsed >= duration + 300) {
         clearInterval(interval);
         onComplete();
       }
