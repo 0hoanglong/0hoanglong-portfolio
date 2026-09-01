@@ -11,8 +11,20 @@ import { ContactSection } from './components/ContactSection';
 import { ToastContainer } from './components/ToastContainer';
 import { LofiProvider } from './context/LofiContext';
 import { LofiMiniPlayer } from './components/LofiMiniPlayer';
+import TargetCursor from './components/TargetCursor';
+import LoadingScreen from './components/LoadingScreen';
+
+const THEME_TARGET_COLORS: Record<ThemeColor, string> = {
+  blue: '#00d2ff',
+  red: '#ff4d6d',
+  yellow: '#f59e0b',
+  green: '#10b981',
+  purple: '#c084fc',
+  pink: '#f43f5e',
+};
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeSection, setActiveSection] = useState<string>('about');
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>('blue');
   const [language, setLanguage] = useState<Language>('en'); // Default to English
@@ -101,6 +113,28 @@ export default function App() {
 
   return (
     <LofiProvider>
+      {/* Initial Boot Matrix Loader with optimized LetterGlitch */}
+      <AnimatePresence>
+        {isLoading && (
+          <LoadingScreen
+            currentTheme={currentTheme}
+            language={language}
+            onComplete={() => setIsLoading(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sci-Fi Target Locking Cursor for interactive buttons and links */}
+      <TargetCursor
+        targetSelector=".cursor-target, button, a, [role='button'], input[type='submit'], input[type='button']"
+        spinDuration={2.5}
+        hideDefaultCursor={true}
+        hoverDuration={0.18}
+        parallaxOn={true}
+        cursorColor="#ffffff"
+        cursorColorOnTarget={THEME_TARGET_COLORS[currentTheme] || '#00d2ff'}
+      />
+
       <div className="min-h-screen bg-[#090a0f] text-slate-100 relative overflow-x-hidden flex flex-col md:flex-row">
         {/* Cosmic Animated Starfield Background */}
         <CosmicBackground />
