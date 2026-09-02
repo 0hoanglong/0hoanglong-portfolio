@@ -103,9 +103,17 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ language }) => {
               {t.tagline}
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            {t.title}
-          </h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
+              {t.title}
+            </h2>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-accent/20 via-purple-500/20 to-emerald-500/20 border border-accent/40 text-xs text-slate-200 font-medium backdrop-blur-md shadow-[0_0_16px_rgba(0,210,255,0.2)]">
+              <Sparkles className="w-3.5 h-3.5 text-accent animate-pulse" />
+              <span className="font-semibold text-white tracking-wide">
+                {t.aiBoost}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -256,10 +264,15 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ language }) => {
         className="mt-8 p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-950 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300"
       >
         <div className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-emerald-400" />
+          <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{t.bottomSummary}</span>
         </div>
-        <div className="flex items-center gap-2 font-mono text-slate-400">
+        <div className="flex items-center gap-3 font-mono text-slate-400 shrink-0">
+          <span className="flex items-center gap-1 text-accent">
+            <Sparkles className="w-3.5 h-3.5" />
+            <strong className="text-white">+50% AI Boost</strong>
+          </span>
+          <span className="text-slate-600">|</span>
           <span>{t.totalSkills} <strong className="text-white">{SKILLS_DATA.length}</strong> {t.skillsCount}</span>
         </div>
       </MagicCard>

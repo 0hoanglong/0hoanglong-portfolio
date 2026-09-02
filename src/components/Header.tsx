@@ -25,11 +25,11 @@ interface HeaderProps {
 
 const THEME_OPTIONS: { id: ThemeColor; name: string; color: string }[] = [
   { id: 'blue', name: 'Cyber Blue', color: '#00d2ff' },
-  { id: 'red', name: 'Crimson Red', color: '#ff4d6d' },
+  { id: 'red', name: 'Scarlet Red', color: '#ef4444' },
   { id: 'yellow', name: 'Amber Gold', color: '#f59e0b' },
   { id: 'green', name: 'Neon Emerald', color: '#10b981' },
   { id: 'purple', name: 'Electric Purple', color: '#a855f7' },
-  { id: 'pink', name: 'Candy Pink', color: '#f43f5e' },
+  { id: 'pink', name: 'Neon Pink', color: '#ff2a9d' },
 ];
 
 export const Header: React.FC<HeaderProps> = ({

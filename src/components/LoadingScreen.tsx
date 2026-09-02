@@ -13,20 +13,20 @@ interface LoadingScreenProps {
 
 const THEME_GLITCH_PALETTES: Record<ThemeColor, string[]> = {
   blue: ['#002b3d', '#00d2ff', '#3b82f6', '#818cf8'],
-  red: ['#3b0a14', '#ff4d6d', '#f43f5e', '#fb7185'],
+  red: ['#3b0a0a', '#ef4444', '#dc2626', '#f87171'],
   yellow: ['#3b2800', '#f59e0b', '#fbbf24', '#fde047'],
   green: ['#022c22', '#10b981', '#34d399', '#6ee7b7'],
   purple: ['#2e1065', '#c084fc', '#a855f7', '#d8b4fe'],
-  pink: ['#3b0720', '#f43f5e', '#fb7185', '#fda4af'],
+  pink: ['#3b0728', '#ff2a9d', '#f472b6', '#fbcfe8'],
 };
 
 const THEME_ACCENTS: Record<ThemeColor, { text: string; bg: string; border: string; glow: string }> = {
   blue: { text: 'text-cyan-400', bg: 'bg-cyan-500', border: 'border-cyan-500/40', glow: 'shadow-[0_0_20px_rgba(0,210,255,0.4)]' },
-  red: { text: 'text-rose-400', bg: 'bg-rose-500', border: 'border-rose-500/40', glow: 'shadow-[0_0_20px_rgba(255,77,109,0.4)]' },
+  red: { text: 'text-red-400', bg: 'bg-red-500', border: 'border-red-500/40', glow: 'shadow-[0_0_20px_rgba(239,68,68,0.4)]' },
   yellow: { text: 'text-amber-400', bg: 'bg-amber-500', border: 'border-amber-500/40', glow: 'shadow-[0_0_20px_rgba(245,158,11,0.4)]' },
   green: { text: 'text-emerald-400', bg: 'bg-emerald-500', border: 'border-emerald-500/40', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.4)]' },
   purple: { text: 'text-purple-400', bg: 'bg-purple-500', border: 'border-purple-500/40', glow: 'shadow-[0_0_20px_rgba(192,132,252,0.4)]' },
-  pink: { text: 'text-pink-400', bg: 'bg-pink-500', border: 'border-pink-500/40', glow: 'shadow-[0_0_20px_rgba(244,63,94,0.4)]' },
+  pink: { text: 'text-pink-400', bg: 'bg-pink-500', border: 'border-pink-500/40', glow: 'shadow-[0_0_20px_rgba(255,42,157,0.4)]' },
 };
 
 const LOADING_STEPS = {

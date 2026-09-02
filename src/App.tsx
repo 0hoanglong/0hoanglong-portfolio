@@ -16,11 +16,11 @@ import LoadingScreen from './components/LoadingScreen';
 
 const THEME_TARGET_COLORS: Record<ThemeColor, string> = {
   blue: '#00d2ff',
-  red: '#ff4d6d',
+  red: '#ef4444',
   yellow: '#f59e0b',
   green: '#10b981',
   purple: '#c084fc',
-  pink: '#f43f5e',
+  pink: '#ff2a9d',
 };
 
 export default function App() {
