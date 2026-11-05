@@ -118,6 +118,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
 
   // Controls the dynamic 70% / 30% expanding flex animation on focus
   const [activeFocusField, setActiveFocusField] = useState<'none' | 'phone' | 'email'>('none');
+  const [privacyConsent, setPrivacyConsent] = useState<boolean>(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
@@ -260,6 +261,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
           : 'Nội dung tin nhắn cần tối thiểu 5 ký tự.';
     }
 
+    // 6. Privacy & Data Consent validation
+    if (!privacyConsent) {
+      errors.privacy = t.privacyConsentRequired;
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -325,6 +331,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
           message: '',
           _hp: '',
         });
+        setPrivacyConsent(false);
         setFieldErrors({});
       } else {
         onShowToast(
@@ -801,6 +808,67 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
                 )}
               </div>
 
+              {/* Data Collection & Privacy Consent Checkbox */}
+              <div className="pt-1">
+                <label 
+                  htmlFor="privacy-consent-checkbox"
+                  className={`flex items-start gap-3 p-3 rounded-2xl border transition-all cursor-pointer select-none group ${
+                    fieldErrors.privacy
+                      ? 'border-rose-500/80 bg-rose-500/10'
+                      : privacyConsent
+                      ? 'border-accent/40 bg-accent-soft/30'
+                      : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <div className="relative flex items-center justify-center mt-0.5 shrink-0">
+                    <input
+                      id="privacy-consent-checkbox"
+                      type="checkbox"
+                      checked={privacyConsent}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setPrivacyConsent(checked);
+                        if (checked) {
+                          setFieldErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.privacy;
+                            return next;
+                          });
+                        }
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div 
+                      className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
+                        privacyConsent 
+                          ? 'bg-accent border-accent text-slate-950 shadow-accent-sm scale-105' 
+                          : fieldErrors.privacy
+                          ? 'border-rose-400 bg-rose-500/20'
+                          : 'border-white/30 bg-slate-900/80 group-hover:border-accent/60'
+                      }`}
+                    >
+                      {privacyConsent && (
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-slate-300 leading-relaxed">
+                    <span className="font-medium text-slate-200">
+                      {t.privacyConsentLabel}
+                    </span>
+                    <span className="text-rose-400 ml-1 font-bold">*</span>
+                  </div>
+                </label>
+
+                {fieldErrors.privacy && (
+                  <p className="text-rose-400 text-xs mt-1.5 flex items-center gap-1.5 animate-in fade-in">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{fieldErrors.privacy}</span>
+                  </p>
+                )}
+              </div>
+
               {/* Rate limit & Cooldown Notice */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-xs">
                 <div className="flex items-center gap-1.5 text-slate-400">
@@ -820,10 +888,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ language, onShow
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting || cooldownRemaining > 0}
+                disabled={isSubmitting || cooldownRemaining > 0 || !privacyConsent}
+                title={!privacyConsent ? t.privacyConsentRequired : undefined}
                 className={`w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  cooldownRemaining > 0
-                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
+                  cooldownRemaining > 0 || !privacyConsent
+                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5 opacity-70'
                     : 'bg-accent-gradient text-white shadow-accent hover:opacity-90 hover:scale-[1.01] active:scale-95'
                 }`}
               >
